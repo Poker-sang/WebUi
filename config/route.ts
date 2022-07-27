@@ -1,5 +1,6 @@
 export default [
   {
+    icon: "home",
     path: "/",
     name: "训练相关",
     component: "@/layouts/basicLayout",
@@ -8,6 +9,11 @@ export default [
         path: "/train",
         name: "网络训练",
         component: "@/pages/train/TrainStepForm"
+      },
+      {
+        path: "/sequential",
+        name: "序列管理",
+        component: "@/pages/sequential/SequentialManager"
       }
     ]
   }, {
@@ -17,7 +23,7 @@ export default [
     routes: [
       {
         path: "/users",
-        name: "userIndex",
+        name: "userIndex"
       }
     ]
   }

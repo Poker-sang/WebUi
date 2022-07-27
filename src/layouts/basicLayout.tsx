@@ -1,11 +1,85 @@
 import React from "react";
+import { ProSettings, SettingDrawer } from "@ant-design/pro-layout";
+import ProLayout, { PageContainer, MenuDataItem } from "@ant-design/pro-layout";
+import { Link } from "umi";
+import { Avatar, Button, Descriptions, Result, Space, Statistic } from "antd";
+import { IconMap } from "@/utils/IconMap";
 
 interface IProp {
-  children?: React.ReactNode;
+  children: React.ReactNode | undefined;
+  routes: MenuDataItem[];
 }
 
-function BasicLayout(props: IProp) {
-  return (<>{props?.children}</>);
+interface IState {
+  settings: Partial<ProSettings> | undefined;
+  pathname: string;
+}
+
+class BasicLayout extends React.Component<IProp, IState> {
+  constructor(props: IProp) {
+    super(props);
+    this.state = {
+      settings: {navTheme: "realDark"}, // "light"
+      pathname: "/"
+    };
+  }
+
+  render() {
+    // 菜单 loop
+    const loopMenuItem = (menus: MenuDataItem[]): MenuDataItem[] =>
+      menus.map(({icon, children, ...item}) =>
+        ({
+          ...item,
+          icon: icon && IconMap[icon as string],
+          children: children && loopMenuItem(children)
+        }));
+
+    return (
+      <div
+        id="test-pro-layout"
+        style={{height: "100vh"}}>
+        <ProLayout
+          title="神经网络"
+          layout="side"
+          headerHeight={48}
+          primaryColor="#1890ff"
+          splitMenus={false}
+          contentWidth="Fluid"
+          fixedHeader={true}
+          fixSiderbar={true}
+          location={{pathname: this.state.pathname}}
+          // logo={require("@/assets/logo.svg")}
+          contentStyle={{height: "calc(100vh - 100px)"}}
+          menuDataRender={() => loopMenuItem(this.props.routes)}
+          waterMarkProps={{content: "神经网络"}}
+          menuItemRender={(item, dom: any) => (
+            <Link to={item.path ?? "/"} onClick={() => { this.setState({pathname: item.path || "/"}); }}>
+              {dom}
+            </Link>
+          )}
+          {...this.state.settings}>
+          <PageContainer
+            content={"asdasd"}
+            tabList={[
+              {tab: "基本信息", key: "base"},
+              {tab: "详细信息", key: "info"}
+            ]}
+            extraContent={<Button key="1" type="primary"> 主操作 </Button>}
+            extra={[<Button key="1" type="primary"> 主操作 </Button>]}
+            footer={[<p>©Poker 2022 Copyright</p>]}>
+            {this.props.children}
+          </PageContainer>
+        </ProLayout>
+        <SettingDrawer
+          pathname={this.state.pathname}
+          enableDarkTheme
+          getContainer={() => document.getElementById("test-pro-layout")}
+          settings={this.state.settings}
+          onSettingChange={(changeSetting) => this.setState({settings: changeSetting})}
+          disableUrlParams={false}/>
+      </div>
+    );
+  }
 }
 
 export default BasicLayout;

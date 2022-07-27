@@ -8,11 +8,3 @@ import {
 export async function getInitialState(): Promise<{}> {
   return Promise.resolve({});
 }
-
-export const layout = ({initialState}: { initialState: {} }): BasicLayoutProps => {
-  return {
-    rightContentRender: () => <Button>123123</Button>,
-    footerRender: () => <>Poker ©Copyright</>,
-    menuHeaderRender: undefined
-  };
-};

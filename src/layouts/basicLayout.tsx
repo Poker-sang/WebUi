@@ -1,8 +1,7 @@
 import React from "react";
-import { ProSettings, SettingDrawer } from "@ant-design/pro-layout";
-import ProLayout, { PageContainer, MenuDataItem } from "@ant-design/pro-layout";
+import ProLayout, { MenuDataItem, PageContainer, ProSettings, SettingDrawer } from "@ant-design/pro-layout";
 import { Link } from "umi";
-import { Avatar, Button, Descriptions, Result, Space, Statistic } from "antd";
+import { Button } from "antd";
 import { IconMap } from "@/utils/IconMap";
 
 interface IProp {
@@ -24,16 +23,16 @@ class BasicLayout extends React.Component<IProp, IState> {
     };
   }
 
-  render() {
-    // 菜单 loop
-    const loopMenuItem = (menus: MenuDataItem[]): MenuDataItem[] =>
-      menus.map(({icon, children, ...item}) =>
-        ({
-          ...item,
-          icon: icon && IconMap[icon as string],
-          children: children && loopMenuItem(children)
-        }));
+  // 菜单 loop
+  loopMenuItem = (menus: MenuDataItem[]): MenuDataItem[] =>
+    menus.map(({icon, children, ...item}) =>
+      ({
+        ...item,
+        icon: icon && IconMap[icon as string],
+        children: children && this.loopMenuItem(children)
+      }));
 
+  render() {
     return (
       <div
         id="test-pro-layout"
@@ -50,7 +49,7 @@ class BasicLayout extends React.Component<IProp, IState> {
           location={{pathname: this.state.pathname}}
           // logo={require("@/assets/logo.svg")}
           contentStyle={{height: "calc(100vh - 100px)"}}
-          menuDataRender={() => loopMenuItem(this.props.routes)}
+          menuDataRender={() => this.loopMenuItem(this.props.routes)}
           waterMarkProps={{content: "神经网络"}}
           menuItemRender={(item, dom: any) => (
             <Link to={item.path ?? "/"} onClick={() => { this.setState({pathname: item.path || "/"}); }}>
@@ -66,7 +65,7 @@ class BasicLayout extends React.Component<IProp, IState> {
             ]}
             extraContent={<Button key="1" type="primary"> 主操作 </Button>}
             extra={[<Button key="1" type="primary"> 主操作 </Button>]}
-            footer={[<p>©Poker 2022 Copyright</p>]}>
+            footer={[<p key="1">©Poker 2022 Copyright</p>]}>
             {this.props.children}
           </PageContainer>
         </ProLayout>

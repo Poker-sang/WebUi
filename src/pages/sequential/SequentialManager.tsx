@@ -1,10 +1,10 @@
-import type { ProColumns } from "@ant-design/pro-components";
-import { ProTable, TableDropdown } from "@ant-design/pro-components";
+import { ProColumns, ProTable, TableDropdown } from "@ant-design/pro-components";
 import { Button } from "antd";
 import { Component } from "react";
 import request from "umi-request";
+import SequentialEditForm from "./SequentialEditForm";
 
-export type TableListItem = {
+type SequentialInfo = {
   key: number;
   name: string;
   layers: number;
@@ -14,13 +14,12 @@ export type TableListItem = {
 };
 
 
-const columns: ProColumns<TableListItem>[] = [
+const columns: ProColumns<SequentialInfo>[] = [
   {
     title: "序列名称",
     width: 100,
     key: "name",
     dataIndex: "name",
-    render: (_) => <a>{_}</a>,
     sorter: (a, b) => a.name.localeCompare(b.name)
   },
   {
@@ -59,8 +58,8 @@ const columns: ProColumns<TableListItem>[] = [
     width: 180,
     key: "option",
     valueType: "option",
-    render: () => [
-      <a key="link">链路</a>,
+    render: (_, record) => [
+      <SequentialEditForm key="edit" record={record.name} remark={record.remark}>编辑</SequentialEditForm>,
       <a key="link2">报警</a>,
       <a key="link3">监控</a>,
       <TableDropdown
@@ -75,12 +74,12 @@ const columns: ProColumns<TableListItem>[] = [
 
 class SequentialManager extends Component {
   render() {
-    return <ProTable<TableListItem>
+    return <ProTable<SequentialInfo>
       columns={columns}
       request={async (params, sorter, filter) => {
         // 表单搜索项会从 params 传入，传递给后端接口。
         console.log(params, sorter, filter);
-        const response: TableListItem[] = await request("/server/api/WeatherForecast", {method: "get"});
+        const response: SequentialInfo[] = await request("/server/api/Sequential/All", {method: "post"});
         console.log(response);
         return {
           data: response,

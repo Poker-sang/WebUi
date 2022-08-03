@@ -3,7 +3,7 @@ export default [
     icon: "home",
     path: "/",
     name: "训练相关",
-    component: "@/layouts/basicLayout",
+    component: "@/pages/layouts/BasicLayout",
     routes: [
       {
         path: "/train",
@@ -13,17 +13,18 @@ export default [
       {
         path: "/sequential",
         name: "序列管理",
-        component: "@/pages/sequential/SequentialManager"
-      }
-    ]
-  }, {
-    path: "/s",
-    name: "Lorem ipsum",
-    component: "@/layouts/basicLayout",
-    routes: [
-      {
-        path: "/users",
-        name: "userIndex"
+        component: "@/pages/layouts/EmptyLayout",
+        routes: [
+          {
+            path: "/sequential",
+            component: "@/pages/sequential/SequentialManager"
+          },
+          {
+            path: "/sequential/edit",
+            title: "编辑",
+            component: "@/pages/sequential/SequentialEditForm"
+          }
+        ]
       }
     ]
   }

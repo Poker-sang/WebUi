@@ -13,15 +13,6 @@ import {
 } from "@ant-design/pro-components";
 import { Button, message } from "antd";
 
-const waitTime = (time: number = 100) => {
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      resolve(true);
-    }, time);
-  });
-};
-
-
 class TrainStepForm extends Component {
   render() {
     return <ProCard>
@@ -30,7 +21,7 @@ class TrainStepForm extends Component {
           console.log(values);
           message.success("提交成功");
         }}
-        formProps={{validateMessages: {required: "此项为必填项"}}}
+        formProps={{ validateMessages: { required: "此项为必填项" } }}
         submitter={{
           render: (props) => {
             switch (props.step) {
@@ -70,17 +61,17 @@ class TrainStepForm extends Component {
             label="数据集"
             name="dataset"
             options={[
-              {value: 1, label: "VOC12"}
+              { value: 1, label: "VOC12" }
             ]}
-            rules={[{required: true}]}/>
+            rules={[{ required: true }]}/>
           <ProFormSelect
             label="网络"
             name="net"
             options={[
-              {value: 1, label: "MobileNet"},
-              {value: 2, label: "策略二"}
+              { value: 1, label: "MobileNet" },
+              { value: 2, label: "策略二" }
             ]}
-            rules={[{required: true}]}/>
+            rules={[{ required: true }]}/>
         </StepsForm.StepForm>
         {/*<{
          name: string,
@@ -95,9 +86,9 @@ class TrainStepForm extends Component {
           <ProFormText
             name="name"
             label="训练标题"
-            tooltip="最长为 64 位，用于标定的唯一id"
+            tooltip="最长为 32 位，用于标定的唯一id"
             placeholder="请输入名称"
-            rules={[{required: true}]}/>
+            rules={[{ required: true }]}/>
           <ProFormTextArea name="remark" label="备注" placeholder="请输入备注"/>
           <ProForm.Group>
             <ProFormDigit
@@ -106,23 +97,23 @@ class TrainStepForm extends Component {
               width="sm"
               placeholder="Batch Size"
               name="batch_size"
-              rules={[{required: true}]}
-              fieldProps={{precision: 0}}/>
+              rules={[{ required: true }]}
+              fieldProps={{ precision: 0 }}/>
             <ProFormDigit
               label="迭代次数"
               placeholder="Epoch"
               min={1}
               width="sm"
               name="epoch"
-              rules={[{required: true}]}
-              fieldProps={{precision: 0}}/>
+              rules={[{ required: true }]}
+              fieldProps={{ precision: 0 }}/>
             <ProFormDigit
               label="学习率"
               width="sm"
               min={0}
               placeholder="Learning Rate"
               name="learning_rate"
-              rules={[{required: true}]}/>
+              rules={[{ required: true }]}/>
           </ProForm.Group>
         </StepsForm.StepForm>
         {/*<{ datetime: string,
@@ -135,7 +126,7 @@ class TrainStepForm extends Component {
           <ProFormDateTimePicker
             name="datetime"
             label="训练开始时间"
-            rules={[{required: true}]}/>
+            rules={[{ required: true }]}/>
           <ProFormCheckbox.Group
             name="priority"
             label="优先度"
@@ -146,16 +137,16 @@ class TrainStepForm extends Component {
             radioType="button"
             initialValue="CUDA"
             options={["CUDA", "CPU"]}
-            rules={[{required: true}]}/>
+            rules={[{ required: true }]}/>
           <ProFormSelect
             label="部署分组策略"
             name="strategy"
             initialValue={1}
             options={[
-              {value: 1, label: "策略一"},
-              {value: 2, label: "策略二"}
+              { value: 1, label: "策略一" },
+              { value: 2, label: "策略二" }
             ]}
-            rules={[{required: true}]}/>
+            rules={[{ required: true }]}/>
         </StepsForm.StepForm>
       </StepsForm>
     </ProCard>;

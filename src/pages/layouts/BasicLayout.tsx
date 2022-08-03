@@ -1,6 +1,6 @@
 import React from "react";
 import ProLayout, { MenuDataItem, PageContainer, ProSettings, SettingDrawer } from "@ant-design/pro-layout";
-import { Link } from "umi";
+import { history, Link } from "umi";
 import { Button } from "antd";
 import { IconMap } from "@/utils/IconMap";
 
@@ -18,14 +18,14 @@ class BasicLayout extends React.Component<IProp, IState> {
   constructor(props: IProp) {
     super(props);
     this.state = {
-      settings: {navTheme: "realDark"}, // "light"
+      settings: { navTheme: "realDark" }, // "light"
       pathname: "/"
     };
   }
 
   // 菜单 loop
   loopMenuItem = (menus: MenuDataItem[]): MenuDataItem[] =>
-    menus.map(({icon, children, ...item}) =>
+    menus.map(({ icon, children, ...item }) =>
       ({
         ...item,
         icon: icon && IconMap[icon as string],
@@ -36,7 +36,7 @@ class BasicLayout extends React.Component<IProp, IState> {
     return (
       <div
         id="test-pro-layout"
-        style={{height: "100vh"}}>
+        style={{ height: "100vh" }}>
         <ProLayout
           title="神经网络"
           layout="side"
@@ -46,13 +46,13 @@ class BasicLayout extends React.Component<IProp, IState> {
           contentWidth="Fluid"
           fixedHeader={true}
           fixSiderbar={true}
-          location={{pathname: this.state.pathname}}
+          location={{ pathname: this.state.pathname }}
           // logo={require("@/assets/logo.svg")}
-          contentStyle={{height: "calc(100vh - 100px)"}}
+          contentStyle={{ height: "calc(100vh - 100px)" }}
           menuDataRender={() => this.loopMenuItem(this.props.routes)}
-          waterMarkProps={{content: "神经网络"}}
+          waterMarkProps={{ content: "神经网络" }}
           menuItemRender={(item, dom: any) => (
-            <Link to={item.path ?? "/"} onClick={() => { this.setState({pathname: item.path || "/"}); }}>
+            <Link to={item.path ?? "/"} onClick={() => { this.setState({ pathname: item.path || "/" }); }}>
               {dom}
             </Link>
           )}
@@ -60,10 +60,10 @@ class BasicLayout extends React.Component<IProp, IState> {
           <PageContainer
             content={"asdasd"}
             tabList={[
-              {tab: "基本信息", key: "base"},
-              {tab: "详细信息", key: "info"}
+              { tab: "基本信息", key: "base" },
+              { tab: "详细信息", key: "info" }
             ]}
-            extraContent={<Button key="1" type="primary"> 主操作 </Button>}
+            extraContent={<Button type="primary" onClick={() => history.goBack()}>返回</Button>}
             extra={[<Button key="1" type="primary"> 主操作 </Button>]}
             footer={[<p key="1">©Poker 2022 Copyright</p>]}>
             {this.props.children}
@@ -74,7 +74,7 @@ class BasicLayout extends React.Component<IProp, IState> {
           enableDarkTheme
           getContainer={() => document.getElementById("test-pro-layout")}
           settings={this.state.settings}
-          onSettingChange={(changeSetting) => this.setState({settings: changeSetting})}
+          onSettingChange={(changeSetting) => this.setState({ settings: changeSetting })}
           disableUrlParams={false}/>
       </div>
     );

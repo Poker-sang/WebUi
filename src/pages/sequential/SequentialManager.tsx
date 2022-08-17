@@ -9,7 +9,7 @@ type SequentialInfo = {
   name: string;
   layers: number;
   usedCount: number;
-  createdAt: number;
+  createTime: number;
   remark: string;
 };
 
@@ -41,10 +41,10 @@ class SequentialManager extends Component {
     {
       title: "创建时间",
       width: 100,
-      key: "createdAt",
-      dataIndex: "createdAt",
+      key: "createTime",
+      dataIndex: "createTime",
       valueType: "date",
-      sorter: (a, b) => a.createdAt - b.createdAt
+      sorter: (a, b) => a.createTime - b.createTime
     },
     {
       title: "备注",

@@ -3,13 +3,14 @@ import { arrayMoveImmutable, EditableProTable, ProColumns } from "@ant-design/pr
 import React, { Component } from "react";
 import { SortableContainer, SortableElement, SortableHandle } from "react-sortable-hoc";
 import { request } from "umi";
+import { Space } from "antd";
 import "../drag.less";
 
 interface DataType {
-  key: any,
-  type: string,
-  outputChannels: number,
-  id: number
+  key: number,
+  name: string,
+  outputChannels: number | string | null
+  kernelSize: number | string | null
 }
 
 interface IState {
@@ -17,11 +18,15 @@ interface IState {
   editableKeys: React.Key[],
 }
 
+interface IProp {
+  sequentialName: string;
+}
+
 class SequentialLayerTable extends Component<any, IState> {
   static DragHandle: any = SortableHandle(() => <MenuOutlined style={{ cursor: "grab", color: "#999" }}/>);
   static SortableItem: any = SortableElement((props: any) => <tr {...props} />);
   static SortContainer: any = SortableContainer((props: any) => <tbody {...props} />);
-  static columns: ProColumns[] = [
+  columns: ProColumns[] = [
     {
       title: "排序",
       key: "sort",
@@ -33,33 +38,53 @@ class SequentialLayerTable extends Component<any, IState> {
     },
     {
       title: "类型",
-      key: "type",
+      key: "name",
       width: 150,
-      dataIndex: "type",
+      dataIndex: "name",
+      editable: false,
       className: "drag-visible"
     },
     {
       title: "输出",
       key: "outputChannels",
-      width: 50,
-      editable: (text, record, index) => record.outputChannels !== -1,
+      width: 100,
+      editable: (text, record: DataType, index) => record.outputChannels !== "*" && record.outputChannels !== null,
       dataIndex: "outputChannels"
+    },
+    {
+      title: "卷积核",
+      key: "kernelSize",
+      width: 120,
+      editable: (text, record: DataType, index) => record.kernelSize !== "*" && record.kernelSize !== null,
+      dataIndex: "kernelSize"
     },
     {
       title: "选项",
       key: "option",
-      editable: false,
-      render: (text, record, _, action) => <a
-        key="editable"
-        onClick={() => { action?.startEditable?.(record.id); }}>
-        编辑
-      </a>
+      valueType: "option",
+      render: (text, record: DataType, _, action) =>
+        <Space>
+          <a
+            key="editable"
+            onClick={() => { action?.startEditable?.(record.key); }}>
+            编辑
+          </a>
+          <a
+            key="delete"
+            onClick={() => {
+              this.setState({ dataSource: this.state.dataSource.filter((item) => item.key !== record.key) });
+            }}>
+            删除
+          </a>
+        </Space>
     }
   ];
 
-  constructor(props: any) {
+  constructor(props: IProp) {
     super(props);
-    this.state = { dataSource: [], editableKeys: [] };
+    this.state = {
+      dataSource: [], editableKeys: []
+    };
   }
 
   onSortEnd = ({ oldIndex, newIndex }: { oldIndex: number; newIndex: number }) => {
@@ -81,21 +106,19 @@ class SequentialLayerTable extends Component<any, IState> {
 
   DraggableBodyRow = (props: any) => {
     const { className, style, ...restProps } = props;
-    // function findIndex base on Table rowKey props and should always be a right array id
-    const id = this.state.dataSource.findIndex((x) => x.id === restProps["data-row-key"]);
-    return <SequentialLayerTable.SortableItem index={id} {...restProps}/>;
+    // function findIndex base on Table rowKey props and should always be a right array key
+    const key = this.state.dataSource.findIndex((x) => x.key === restProps["data-row-key"]);
+    return <SequentialLayerTable.SortableItem index={key} {...restProps}/>;
   };
 
   render() {
     return (
       <EditableProTable
-        rowKey="id"
+        rowKey="key"
         headerTitle="可编辑表格"
-        maxLength={5}
-        scroll={{ x: 960 }}
         recordCreatorProps={{
           position: "bottom",
-          record: () => ({ id: (Math.random() * 1000000).toFixed(0) })
+          record: () => ({ key: (Math.random() * 1000000).toFixed(0) })
         }}
         loading={false}
         value={this.state.dataSource}
@@ -108,15 +131,21 @@ class SequentialLayerTable extends Component<any, IState> {
           },
           onChange: (editableKeys) => this.setState({ editableKeys: editableKeys })
         }}
-        columns={SequentialLayerTable.columns}
+        columns={this.columns}
         search={false}
         pagination={false}
         request={async (params, sorter, filter) => {
           // 表单搜索项会从 params 传入，传递给后端接口。
-          const response = await request("/server/api/Sequential/All", { method: "post" });
+          const response: [] = await request("/server/api/Sequential/Layers/All",
+            {
+              method: "post",
+              params: {
+                sequentialName: this.props.sequentialName
+              }
+            });
           return {
-            data: response,
-            success: true//TODO here
+            data: response,//need key
+            success: response.length !== 0 //TODO here
           };
         }}
         components={{

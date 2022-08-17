@@ -8,6 +8,7 @@ import { request } from "umi";
 class SequentialEditForm extends Component <any, { remark: string }> {
   params: URLSearchParams = new URL(location.toString()).searchParams;
   name: string | null = this.params.get("name");
+  // 用于刷新表单
   formRef = React.createRef<FormInstance>();
 
   constructor(props: any) {
@@ -18,11 +19,11 @@ class SequentialEditForm extends Component <any, { remark: string }> {
   async componentDidMount() {
     if (this.name === null)
       return;
-    const res = await request("/server/api/Sequential/Find", {
+    const res = await request("/server/api/Sequential/Find/Property", {
       method: "post",
       params: {
-        name: this.name,
-        property: "Remark"
+        sequentialName: this.name,
+        propertyName: "Remark"
       }
     });
     this.setState({ remark: res });
@@ -32,7 +33,8 @@ class SequentialEditForm extends Component <any, { remark: string }> {
   render() {
     return <Space direction="vertical">
       <ProForm<{ name: string, remark: string }>
-        formRef={this.formRef}>
+        formRef={this.formRef}
+        key={1}>
         <ProFormText
           width="md"
           name="name"
@@ -43,10 +45,11 @@ class SequentialEditForm extends Component <any, { remark: string }> {
         <ProFormTextArea
           name="remark"
           label="备注"
+          width="md"
           placeholder="请输入备注"
           initialValue={this.state.remark}/>
       </ProForm>
-      <SequentialLayerTable/>
+      <SequentialLayerTable sequentialName={this.name}/>
     </Space>;
   }
 }

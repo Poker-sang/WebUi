@@ -23,6 +23,11 @@ export default [
             path: "/sequential/edit",
             title: "编辑",
             component: "@/pages/sequential/SequentialEditForm"
+          },
+          {
+            path: "/sequential/layer/edit",
+            title: "编辑层",
+            component: "@/pages/sequential/LayerEditForm"
           }
         ]
       }

@@ -51,9 +51,9 @@ class BasicLayout extends React.Component<IProp, IState> {
           contentStyle={{ height: "calc(100vh - 100px)" }}
           menuDataRender={() => this.loopMenuItem(this.props.routes)}
           waterMarkProps={{ content: "神经网络" }}
-          menuItemRender={(item, dom: any) => (
+          menuItemRender={(item, dom) => (
             <Link to={item.path ?? "/"} onClick={() => { this.setState({ pathname: item.path || "/" }); }}>
-              {dom}
+              <>{dom}</>
             </Link>
           )}
           {...this.state.settings}>

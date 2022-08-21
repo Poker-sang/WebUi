@@ -59,12 +59,13 @@ class SequentialManager extends Component {
       key: "option",
       valueType: "option",
       render: (_, record) => [
-        <Link key="edit" to={{
-          pathname: "/sequential/edit",
-          query: {
-            name: record.name
-          }
-        }}>编辑</Link>,
+        <Link key="edit"
+              to={{
+                pathname: "/sequential/edit",
+                query: {
+                  name: record.name
+                }
+              }}>编辑</Link>,
         <a key="link2">报警</a>,
         <a key="link3">监控</a>,
         <TableDropdown

@@ -9,7 +9,7 @@ import {
 import { Component } from "react";
 import { request } from "umi";
 import { message } from "antd";
-
+import ProFormBinding from "./components/ProFormBinding";
 
 interface IState {
   dataSource: DataType[],
@@ -18,13 +18,34 @@ interface IState {
 interface DataType {
   name: string,
   type: string,
+  isBinding: boolean,
   value: any
 }
+
+interface ParamType {
+  key: number,
+  name: string,
+  type: string
+}
+
+
+const intDefaultProps: {
+  width: "sm"
+  min: number
+  fieldProps: { precision: 0 },
+  rules: [{ required: true }]
+} = {
+  width: "sm",
+  min: 0,
+  fieldProps: { precision: 0 },
+  rules: [{ required: true }]
+};
 
 class LayerEditForm extends Component<any, IState> {
   params = new URL(location.toString()).searchParams;
   name = this.params.get("name");
   index = parseInt(this.params.get("index")!);
+  dict = new Map<number, string>;
 
   constructor(props: any) {
     super(props);
@@ -42,39 +63,54 @@ class LayerEditForm extends Component<any, IState> {
           index: this.index
         }
       });
+
+    const resTable: ParamType[] = await request("/server/api/Sequential/Params",
+      {
+        method: "post",
+        params: { sequentialName: this.name }
+      });
+    resTable.unshift({ key: -1, name: "InputChannels", type: "Int64" });
+    resTable.map(value => this.dict.set(value.key, value.name));
     this.setState({ dataSource: response });
   }
 
   render() {
     return <ProForm
       title={this.name ?? undefined}
-      autoFocusFirstInput
+      autoFocusFirstInput={true}
       onFinish={async (values) => {
         console.log(values);
         message.success("提交成功");
         return true;
       }}>
       {this.state.dataSource.map((datum, index) => {
+        const initValue = datum.isBinding ? undefined : datum.value;
+        if (datum.isBinding)
+          datum.value = this.dict.get(datum.value);
         switch (datum.type) {
+          case "Boolean":
+            return <ProFormBinding key={index} datum={datum} type={"布尔"}>
+              <ProFormSwitch name={datum.name} rules={[{ required: true }]} initialValue={initValue}
+                             checkedChildren="是" unCheckedChildren="否"/>
+            </ProFormBinding>;
           case "Double":
-            return <ProFormGroup key={index} label={`${datum.name}-小数`}>
+            return <ProFormBinding key={index} datum={datum} type={"小数"}>
               <ProFormDigit name={datum.name} width="sm" min={0} fieldProps={{ precision: 10 }}
-                            initialValue={datum.value} rules={[{ required: true }]}/>
-            </ProFormGroup>;
+                            rules={[{ required: true }]} initialValue={initValue}/>
+            </ProFormBinding>;
           case "Int64":
-            return <ProFormGroup key={index} label={`${datum.name}-整数`}>
-              <ProFormDigit name={datum.name} width="sm" min={0} fieldProps={{ precision: 0 }}
-                            initialValue={datum.value} rules={[{ required: true }]}/>
-            </ProFormGroup>;
+            return <ProFormBinding key={index} datum={datum} type={"整数"}>
+              <ProFormDigit name={datum.name} {...intDefaultProps} initialValue={initValue}/>
+            </ProFormBinding>;
           case "Rect":
-            return <ProFormGroup key={index} label={`${datum.name}-两个整数`}>
-              <ProFormDigit name={`${datum.name}1`} width="xs" min={0} fieldProps={{ precision: 0 }}
-                            initialValue={datum.value[0]} rules={[{ required: true }]}/>
-              <ProFormDigit name={`${datum.name}2`} width="xs" min={0} fieldProps={{ precision: 0 }}
-                            initialValue={datum.value[1]} rules={[{ required: true }]}/>
-            </ProFormGroup>;
+            return <ProFormBinding key={index} datum={datum} type={"两个整数"}>
+              <ProFormGroup>
+                <ProFormDigit name={`${datum.name}1`} {...intDefaultProps} initialValue={initValue?.[0]}/>
+                <ProFormDigit name={`${datum.name}2`} {...intDefaultProps} initialValue={initValue?.[1]}/>
+              </ProFormGroup>
+            </ProFormBinding>;
           case "PaddingModes":
-            return <ProFormGroup key={index} label={`${datum.name}-枚举`}>
+            return <ProFormBinding key={index} datum={datum} type={"枚举"}>
               <ProFormSelect
                 name={datum.name}
                 valueEnum={{
@@ -84,37 +120,31 @@ class LayerEditForm extends Component<any, IState> {
                   3: "Circular",
                   4: "Constant"
                 }}
-                placeholder="Please select a country"
                 rules={[{ required: true }]}
-                initialValue={datum.value.toString()}/>
-            </ProFormGroup>;
+                initialValue={initValue?.toString()}/>
+            </ProFormBinding>;
           case "PaddingType":
             let isRect = true;
             if (typeof datum.value === "number")
               isRect = false;
-            return <ProFormGroup key={index} label={`${datum.name}-两个整数或枚举`}>
-              <ProFormSwitch name={`${datum.name}mode`} initialValue={isRect}/>
+            return <ProFormBinding key={index} datum={datum} type={"两个整数或枚举"}>
+              <ProFormSwitch name={`${datum.name}mode`} initialValue={isRect}
+                             checkedChildren="Rect" unCheckedChildren="枚举"/>
               <ProFormDependency name={[`${datum.name}mode`]}>
-                {(data) => {
+                {(switchData) => {
                   let mode = false;
-                  for (let key in data)
-                    mode = data[key];
+                  for (let key in switchData)
+                    mode = switchData[key];
                   return mode
                     ? <ProFormGroup>
                       <ProFormDigit
                         name={`${datum.name}rect1`}
-                        width="xs"
-                        min={0}
-                        fieldProps={{ precision: 0 }}
-                        initialValue={isRect ? datum.value[0] : 0}
-                        rules={[{ required: true }]}/>
+                        {...intDefaultProps}
+                        initialValue={isRect ? initValue?.[0] : 0}/>
                       <ProFormDigit
                         name={`${datum.name}rect2`}
-                        width="xs"
-                        min={0}
-                        fieldProps={{ precision: 0 }}
-                        initialValue={isRect ? datum.value[1] : 0}
-                        rules={[{ required: true }]}/>
+                        {...intDefaultProps}
+                        initialValue={isRect ? initValue?.[1] : 0}/>
                     </ProFormGroup>
                     : <ProFormSelect
                       name={`${datum.name}enum`}
@@ -123,10 +153,10 @@ class LayerEditForm extends Component<any, IState> {
                         1: "Same"
                       }}
                       rules={[{ required: true }]}
-                      initialValue={isRect ? "0" : datum.value.toString()}/>;
+                      initialValue={isRect ? undefined : initValue?.toString()}/>;
                 }}
               </ProFormDependency>
-            </ProFormGroup>;
+            </ProFormBinding>;
           default:
             break;
         }

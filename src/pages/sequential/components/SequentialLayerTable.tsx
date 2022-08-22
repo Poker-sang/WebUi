@@ -99,7 +99,6 @@ class SequentialLayerTable extends Component<IProp, IState> {
           <a
             key="delete"
             onClick={() => {
-              console.log("5");
               this.setState({ dataSource: this.state.dataSource.filter((item) => item.key !== rowData.key) });
             }}>
             删除
@@ -116,28 +115,22 @@ class SequentialLayerTable extends Component<IProp, IState> {
         method: "post",
         params: { sequentialName: this.props.sequentialName }
       });
-    console.log("2");
     this.setState({ dataSource: response });
     this.ref.current?.reload();
   }
 
   render() {
-    return (
-      <DragSortTable
-        rowKey="key"
-        headerTitle="包含层"
-        loading={false}
-        actionRef={this.ref}
-        dataSource={this.state.dataSource}
-        columns={this.columns}
-        dragSortKey="sort"
-        search={false}
-        onDragSortEnd={(newDataSource) => {
-          console.log("3");
-          this.setState({ dataSource: newDataSource });
-        }}
-        pagination={false}/>
-    );
+    return <DragSortTable
+      rowKey="key"
+      headerTitle="包含层"
+      loading={false}
+      actionRef={this.ref}
+      dataSource={this.state.dataSource}
+      columns={this.columns}
+      dragSortKey="sort"
+      search={false}
+      onDragSortEnd={(newDataSource) => { this.setState({ dataSource: newDataSource }); }}
+      pagination={false}/>;
   }
 }
 

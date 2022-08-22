@@ -48,7 +48,6 @@ class BasicLayout extends React.Component<IProp, IState> {
           fixSiderbar={true}
           location={{ pathname: this.state.pathname }}
           // logo={require("@/assets/logo.svg")}
-          contentStyle={{ height: "calc(100vh - 100px)" }}
           menuDataRender={() => this.loopMenuItem(this.props.routes)}
           waterMarkProps={{ content: "神经网络" }}
           menuItemRender={(item, dom) => (

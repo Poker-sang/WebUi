@@ -9,5 +9,6 @@ export default defineConfig({
   proxy: proxy,
   routes: routes,
   mfsu: {},
+  // dva: {},
   fastRefresh: {}
 });

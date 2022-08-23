@@ -21,7 +21,7 @@ class ProFormBinding extends Component <IProp> {
                      name={`${this.props.datum.name}bindingMode`}
                      initialValue={this.props.datum.isBinding}/>
       <ProFormDependency name={[`${this.props.datum.name}bindingMode`]}>
-        {(switchData) => {
+        {switchData => {
           let mode = false;
           for (let key in switchData)
             mode = switchData[key];

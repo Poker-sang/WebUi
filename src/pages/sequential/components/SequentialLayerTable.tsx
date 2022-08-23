@@ -77,7 +77,7 @@ class SequentialLayerTable extends Component<IProp, IState> {
       key: "containsParams",
       width: 150,
       dataIndex: "containsParams",
-      render: (dom) => dom?.toString()
+      render: dom => dom?.toString()
     },
     {
       title: "选项",
@@ -99,7 +99,7 @@ class SequentialLayerTable extends Component<IProp, IState> {
           <a
             key="delete"
             onClick={() => {
-              this.setState({ dataSource: this.state.dataSource.filter((item) => item.key !== rowData.key) });
+              this.setState({ dataSource: this.state.dataSource.filter(item => item.key !== rowData.key) });
             }}>
             删除
           </a>
@@ -129,7 +129,7 @@ class SequentialLayerTable extends Component<IProp, IState> {
       columns={this.columns}
       dragSortKey="sort"
       search={false}
-      onDragSortEnd={(newDataSource) => { this.setState({ dataSource: newDataSource }); }}
+      onDragSortEnd={newDataSource => { this.setState({ dataSource: newDataSource }); }}
       pagination={false}/>;
   }
 }

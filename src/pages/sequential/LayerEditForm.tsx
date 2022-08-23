@@ -78,7 +78,7 @@ class LayerEditForm extends Component<any, IState> {
     return <ProForm
       title={this.name ?? undefined}
       autoFocusFirstInput={true}
-      onFinish={async (values) => {
+      onFinish={async values => {
         console.log(values);
         message.success("提交成功");
         return true;
@@ -131,7 +131,7 @@ class LayerEditForm extends Component<any, IState> {
               <ProFormSwitch name={`${datum.name}mode`} initialValue={isRect}
                              checkedChildren="Rect" unCheckedChildren="枚举"/>
               <ProFormDependency name={[`${datum.name}mode`]}>
-                {(switchData) => {
+                {switchData => {
                   let mode = false;
                   for (let key in switchData)
                     mode = switchData[key];

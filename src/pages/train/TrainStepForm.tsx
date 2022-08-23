@@ -17,13 +17,13 @@ class TrainStepForm extends Component {
   render() {
     return <ProCard>
       <StepsForm
-        onFinish={async (values) => {
+        onFinish={async values => {
           console.log(values);
           message.success("提交成功");
         }}
         formProps={{ validateMessages: { required: "此项为必填项" } }}
         submitter={{
-          render: (props) => {
+          render: props => {
             switch (props.step) {
               case 0:
                 return <Button type="primary" onClick={() => props.onSubmit?.()}>

@@ -13,7 +13,9 @@ interface IState {
 interface DataType {
   key: number | "*",
   name: string,
-  type: string
+  type: string,
+  remark: string | null,
+  default: string | null
 }
 
 class SequentialEditForm extends Component <any, IState> {
@@ -37,6 +39,12 @@ class SequentialEditForm extends Component <any, IState> {
       title: "类型",
       dataIndex: "type",
       key: "type"
+    },
+    {
+      title: "默认值",
+      dataIndex: "default",
+      key: "default",
+      render: dom => dom?.toString()
     }];
 
   constructor(props: any) {
@@ -60,7 +68,7 @@ class SequentialEditForm extends Component <any, IState> {
         method: "post",
         params: { sequentialName: this.name }
       });
-    resTable.unshift({ key: "*", name: "InputChannels", type: "Int64" });
+    resTable.unshift({ key: "*", name: "InputChannels", type: "Int64", remark: null, default: null });
 
     this.setState({ remark: resForm, tableSource: resTable });
     this.formRef.current?.resetFields();

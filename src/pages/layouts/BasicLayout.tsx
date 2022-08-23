@@ -73,7 +73,7 @@ class BasicLayout extends React.Component<IProp, IState> {
           enableDarkTheme
           getContainer={() => document.getElementById("test-pro-layout")}
           settings={this.state.settings}
-          onSettingChange={(changeSetting) => this.setState({ settings: changeSetting })}
+          onSettingChange={changeSetting => this.setState({ settings: changeSetting })}
           disableUrlParams={false}/>
       </div>
     );

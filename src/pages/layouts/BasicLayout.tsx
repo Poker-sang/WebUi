@@ -3,6 +3,7 @@ import ProLayout, { MenuDataItem, PageContainer, ProSettings, SettingDrawer } fr
 import { history, Link } from "umi";
 import { Button } from "antd";
 import { IconMap } from "@/utils/IconMap";
+import Path from "@/utils/Path";
 
 interface IProp {
   children: React.ReactNode | undefined;
@@ -51,7 +52,7 @@ class BasicLayout extends React.Component<IProp, IState> {
           menuDataRender={() => this.loopMenuItem(this.props.routes)}
           waterMarkProps={{ content: "神经网络" }}
           menuItemRender={(item, dom) => (
-            <Link to={item.path ?? "/"} onClick={() => { this.setState({ pathname: item.path || "/" }); }}>
+            <Link to={item.path ?? Path.Home} onClick={() => { this.setState({ pathname: item.path || "/" }); }}>
               <>{dom}</>
             </Link>
           )}

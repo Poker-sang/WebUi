@@ -42,19 +42,18 @@ const intDefaultProps: {
 };
 
 class LayerEditForm extends Component<any, IState> {
-  params = new URL(location.toString()).searchParams;
-  name = this.params.get("name");
-  index = parseInt(this.params.get("index")!);
+  name: string;
+  index: number;
   dict = new Map<number, string>;
 
   constructor(props: any) {
     super(props);
+    this.name = this.props.match.params.name;
+    this.index = this.props.match.params.index;
     this.state = { dataSource: [] };
   }
 
   async componentDidMount() {
-    if (this.name === null)
-      return;
     const response: DataType[] = await request("/server/api/Sequential/Layers/Edit",
       {
         method: "post",
@@ -62,6 +61,8 @@ class LayerEditForm extends Component<any, IState> {
           sequentialName: this.name,
           index: this.index
         }
+        // headers: { "Content-Type": "application/json" },
+        // data: `"${this.name}"`
       });
 
     const resTable: ParamType[] = await request("/server/api/Sequential/Params",

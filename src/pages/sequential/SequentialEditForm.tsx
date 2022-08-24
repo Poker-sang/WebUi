@@ -19,9 +19,7 @@ interface DataType {
 }
 
 class SequentialEditForm extends Component <any, IState> {
-  params: URLSearchParams = new URL(location.toString()).searchParams;
-  name: string | null = this.params.get("name");
-
+  name: string;
   formRef = React.createRef<FormInstance>();
   columns: ColumnsType<DataType> = [
     {
@@ -47,8 +45,10 @@ class SequentialEditForm extends Component <any, IState> {
       render: dom => dom?.toString()
     }];
 
+
   constructor(props: any) {
     super(props);
+    this.name = this.props.match.params.name;
     this.state = { remark: "", tableSource: [] };
   }
 

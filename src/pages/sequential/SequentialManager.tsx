@@ -3,6 +3,7 @@ import { Button } from "antd";
 import { Component } from "react";
 import { Link } from "umi";
 import request from "umi-request";
+import Path from "@/utils/Path";
 
 type SequentialInfo = {
   key: number;
@@ -60,12 +61,7 @@ class SequentialManager extends Component {
       valueType: "option",
       render: (_, record) => [
         <Link key="edit"
-              to={{
-                pathname: "/sequential/edit",
-                query: {
-                  name: record.name
-                }
-              }}>编辑</Link>,
+              to={Path.SequentialEdit(record.name)}>编辑</Link>,
         <a key="link2">报警</a>,
         <a key="link3">监控</a>,
         <TableDropdown

@@ -4,6 +4,7 @@ import { Link, request } from "umi";
 import { Space } from "antd";
 import "../drag.less";
 import { OptParam } from "@/pages/sequential/types/kernel";
+import Path from "@/utils/Path";
 
 interface DataType {
   key: number,
@@ -20,7 +21,7 @@ interface IState {
 }
 
 interface IProp {
-  sequentialName: string | null;
+  sequentialName: string;
 }
 
 class SequentialLayerTable extends Component<IProp, IState> {
@@ -87,13 +88,7 @@ class SequentialLayerTable extends Component<IProp, IState> {
         <Space>
           <Link
             key="edit"
-            to={{
-              pathname: "/sequential/layer/edit",
-              query: {
-                name: this.props.sequentialName,
-                index: rowData.key
-              }
-            }}>
+            to={Path.LayerEdit(this.props.sequentialName, rowData.key)}>
             编辑
           </Link>
           <a
@@ -108,8 +103,6 @@ class SequentialLayerTable extends Component<IProp, IState> {
   ];
 
   async componentDidMount() {
-    if (this.props.sequentialName === null)
-      return;
     const response: [] = await request("/server/api/Sequential/Layers",
       {
         method: "post",

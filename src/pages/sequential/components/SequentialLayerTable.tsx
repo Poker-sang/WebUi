@@ -49,7 +49,7 @@ class SequentialLayerTable extends Component<IProp, IState> {
       key: "name",
       width: 150,
       dataIndex: "name",
-      render: (dom, rowData) => rowData.type === "sequential" ? <strong>{dom}</strong> : dom,
+      render: (dom, rowData) => rowData.type === "sequential" ? dom : <strong>{dom}</strong>,
       className: "drag-visible"
     },
     {

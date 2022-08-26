@@ -6,12 +6,12 @@ import { IconMap } from "@/utils/IconMap";
 import Path from "@/utils/Path";
 
 interface IProp {
-  children: React.ReactNode | undefined;
+  children?: React.ReactNode;
   routes: MenuDataItem[];
 }
 
 interface IState {
-  settings: Partial<ProSettings> | undefined;
+  settings?: Partial<ProSettings>;
   pathname: string;
 }
 
@@ -20,7 +20,7 @@ class BasicLayout extends React.Component<IProp, IState> {
     super(props);
     this.state = {
       settings: { navTheme: "realDark" }, // "light"
-      pathname: "/"
+      pathname: Path.Home
     };
   }
 
@@ -36,7 +36,7 @@ class BasicLayout extends React.Component<IProp, IState> {
   render() {
     return (
       <div
-        id="test-pro-layout"
+        id="pro-layout"
         style={{ height: "100vh" }}>
         <ProLayout
           title="神经网络"
@@ -58,13 +58,15 @@ class BasicLayout extends React.Component<IProp, IState> {
           )}
           {...this.state.settings}>
           <PageContainer
-            content={"asdasd"}
-            tabList={[
-              { tab: "基本信息", key: "base" },
-              { tab: "详细信息", key: "info" }
-            ]}
-            extraContent={<Button type="primary" onClick={() => history.goBack()}>返回</Button>}
-            extra={[<Button key="1" type="primary"> 主操作 </Button>]}
+            /*
+             content={"content"}
+             tabList={[
+             { tab: "基本信息", key: "base" },
+             { tab: "详细信息", key: "info" }
+             ]}
+             extraContent={<Button type="primary" onClick={() => history.goBack()}>返回</Button>}
+             */
+            extra={<Button type="primary" onClick={() => history.goBack()}>返回</Button>}
             footer={[<p key="1">©Poker 2022 Copyright</p>]}>
             {this.props.children}
           </PageContainer>
@@ -72,7 +74,7 @@ class BasicLayout extends React.Component<IProp, IState> {
         <SettingDrawer
           pathname={this.state.pathname}
           enableDarkTheme
-          getContainer={() => document.getElementById("test-pro-layout")}
+          getContainer={() => document.getElementById("pro-layout")}
           settings={this.state.settings}
           onSettingChange={changeSetting => this.setState({ settings: changeSetting })}
           disableUrlParams={false}/>

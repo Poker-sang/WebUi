@@ -55,11 +55,11 @@ class SequentialEditForm extends Component <any, IState> {
   async componentDidMount() {
     if (this.name === null)
       return;
-    const resForm = await request("/server/api/Sequential/Find/Property", {
+    const resForm = await request("/server/api/Sequential/Find/Metadata", {
       method: "post",
       params: {
         sequentialName: this.name,
-        propertyName: "Remark"
+        metadataName: "Remark"
       }
     });
 

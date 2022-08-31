@@ -4,6 +4,7 @@ import { Component } from "react";
 import { Link } from "umi";
 import request from "umi-request";
 import Path from "@/utils/Path";
+import Api from "@/utils/Api";
 
 type SequentialInfo = {
   key: number;
@@ -79,7 +80,7 @@ class SequentialManager extends Component {
       columns={SequentialManager.columns}
       request={async (params, sorter, filter) => {
         // 表单搜索项会从 params 传入，传递给后端接口。
-        const response: SequentialInfo[] = await request("/server/api/Sequential/All", { method: "post" });
+        const response = await Api.SequentialGet<SequentialInfo[]>("All");
         return {
           data: response,
           success: true
@@ -94,7 +95,9 @@ class SequentialManager extends Component {
         <Button key="showLog">查看日志</Button>,
         <Button key="output">导出数据</Button>,
         <Button type="primary" key="primary">
-          新建序列
+          <Link to={Path.SequentialNew}>
+            新建序列
+          </Link>
         </Button>
       ]}
     />;

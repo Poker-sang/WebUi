@@ -30,6 +30,11 @@ export default [
             path: Path.LayerEdit(),
             title: "编辑层",
             component: "@/pages/sequential/LayerEditForm"
+          },
+          {
+            path: Path.SequentialNew,
+            title: "新建层",
+            component: "@/pages/sequential/SequentialEditForm"
           }
         ]
       }

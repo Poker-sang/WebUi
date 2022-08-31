@@ -7,9 +7,9 @@ import {
   ProFormSwitch
 } from "@ant-design/pro-components";
 import { Component } from "react";
-import { request } from "umi";
 import { message } from "antd";
 import ProFormBinding from "./components/ProFormBinding";
+import Api from "@/utils/Api";
 
 interface IState {
   dataSource: DataType[],
@@ -54,22 +54,12 @@ class LayerEditForm extends Component<any, IState> {
   }
 
   async componentDidMount() {
-    const response: DataType[] = await request("/server/api/Sequential/Layers/Edit",
-      {
-        method: "post",
-        params: {
-          sequentialName: this.name,
-          index: this.index
-        }
-        // headers: { "Content-Type": "application/json" },
-        // data: `"${this.name}"`
-      });
+    const response = await Api.SequentialGet<DataType[]>("Layers/Edit", {
+      sequentialName: this.name,
+      index: this.index
+    });
 
-    const resTable: ParamType[] = await request("/server/api/Sequential/Params",
-      {
-        method: "post",
-        params: { sequentialName: this.name }
-      });
+    const resTable = await Api.SequentialGet<ParamType[]>("Params", { sequentialName: this.name });
     resTable.unshift({ key: -1, name: "InputChannels", type: "Int64" });
     resTable.map(value => this.dict.set(value.key, value.name));
     this.setState({ dataSource: response });
@@ -161,8 +151,7 @@ class LayerEditForm extends Component<any, IState> {
           default:
             break;
         }
-      })
-      }
+      })}
     </ProForm>;
   }
 }

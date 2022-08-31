@@ -31,19 +31,19 @@ class TrainStepForm extends Component {
                 </Button>;
               case 1:
                 return [
-                  <Button key="pre" onClick={() => props.onPre?.()}>
+                  <Button key="last" onClick={() => props.onPre?.()}>
                     上一步
                   </Button>,
-                  <Button type="primary" key="goToTree" onClick={() => props.onSubmit?.()}>
+                  <Button type="primary" key="next" onClick={() => props.onSubmit?.()}>
                     下一步
                   </Button>
                 ];
               case 2:
                 return [
-                  <Button key="gotoTwo" onClick={() => props.onPre?.()}>
+                  <Button key="last" onClick={() => props.onPre?.()}>
                     上一步
                   </Button>,
-                  <Button type="primary" key="goToTree" onClick={() => props.onSubmit?.()}>
+                  <Button type="primary" key="next" onClick={() => props.onSubmit?.()}>
                     完成
                   </Button>
                 ];
@@ -72,6 +72,14 @@ class TrainStepForm extends Component {
               { value: 2, label: "策略二" }
             ]}
             rules={[{ required: true }]}/>
+          <ProFormDigit
+            label="输入通道数"
+            min={1}
+            initialValue={3}
+            placeholder="Input Channels"
+            name="InputChannels"
+            rules={[{ required: true }]}
+            fieldProps={{ precision: 0 }}/>
         </StepsForm.StepForm>
         {/*<{
          name: string,

@@ -3,7 +3,7 @@ import { Col, Row, Space, Table } from "antd";
 import { ColumnsType } from "antd/es/table";
 import React, { Component } from "react";
 import SequentialLayerTable from "./components/SequentialLayerTable";
-import { request } from "umi";
+import Api from "@/utils/Api";
 
 interface IState {
   remark: string,
@@ -19,7 +19,7 @@ interface DataType {
 }
 
 class SequentialEditForm extends Component <any, IState> {
-  name: string;
+  name?: string;
   formRef = React.createRef<FormInstance>();
   columns: ColumnsType<DataType> = [
     {
@@ -53,21 +53,14 @@ class SequentialEditForm extends Component <any, IState> {
   }
 
   async componentDidMount() {
-    if (this.name === null)
+    if (this.name === undefined)
       return;
-    const resForm = await request("/server/api/Sequential/Find/Metadata", {
-      method: "post",
-      params: {
-        sequentialName: this.name,
-        metadataName: "Remark"
-      }
+    const resForm = await Api.SequentialGet<string>("Find/Metadata", {
+      sequentialName: this.name,
+      metadataName: "Remark"
     });
 
-    const resTable: DataType[] = await request("/server/api/Sequential/Params",
-      {
-        method: "post",
-        params: { sequentialName: this.name }
-      });
+    const resTable = await Api.SequentialGet<DataType[]>("Params", { sequentialName: this.name });
     resTable.unshift({ key: "*", name: "InputChannels", type: "Int64", remark: null, default: null });
 
     this.setState({ remark: resForm, tableSource: resTable });

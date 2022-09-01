@@ -4,6 +4,7 @@ import { ColumnsType } from "antd/es/table";
 import React, { Component } from "react";
 import SequentialLayerTable from "./components/SequentialLayerTable";
 import Api from "@/utils/Api";
+import { KeepAlive } from "umi";
 
 interface IState {
   remark: string,
@@ -63,6 +64,7 @@ class SequentialEditForm extends Component <any, IState> {
     const resTable = await Api.SequentialGet<DataType[]>("Params", { sequentialName: this.name });
     resTable.unshift({ key: "*", name: "InputChannels", type: "Int64", remark: null, default: null });
 
+
     this.setState({ remark: resForm, tableSource: resTable });
     this.formRef.current?.resetFields();
   }
@@ -96,7 +98,10 @@ class SequentialEditForm extends Component <any, IState> {
             rowKey="key"/>
         </Col>
       </Row>
-      <SequentialLayerTable sequentialName={this.name}/>
+      {/*@ts-ignore*/}
+      <KeepAlive>
+        <SequentialLayerTable sequentialName={this.name}/>
+      </KeepAlive>
     </Space>;
   }
 }

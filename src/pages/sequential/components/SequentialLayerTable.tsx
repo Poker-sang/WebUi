@@ -29,7 +29,7 @@ interface DataType {
 }
 
 interface IState {
-  dataSource: DataType[],
+  tableSource: DataType[],
   editableKeys: React.Key[],
 }
 
@@ -42,17 +42,18 @@ class SequentialLayerTable extends Component<IProp, IState> {
   static SortableItem: any = SortableElement((props: any) => <tr {...props} />);
   static SortContainer: any = SortableContainer((props: any) => <tbody {...props} />);
   ref = React.createRef<ActionType>();
+  dataSource: [][] = [];
 
   constructor(props: IProp) {
     super(props);
-    this.state = { dataSource: [], editableKeys: [] };
+    this.state = { tableSource: [], editableKeys: [] };
   }
 
   onSortEnd = ({ oldIndex, newIndex }: { oldIndex: number, newIndex: number }) => {
     if (oldIndex !== newIndex)
       this.setState({
-        dataSource: [
-          ...arrayMoveImmutable([...this.state.dataSource], oldIndex, newIndex).filter((el) => !!el)
+        tableSource: [
+          ...arrayMoveImmutable([...this.state.tableSource], oldIndex, newIndex).filter((el) => !!el)
         ]
       });
   };
@@ -67,7 +68,7 @@ class SequentialLayerTable extends Component<IProp, IState> {
 
   DraggableBodyRow = (props: any) => {
     const { className, style, ...restProps } = props;
-    const key = this.state.dataSource.findIndex((x) => x.key === restProps["data-row-key"]);
+    const key = this.state.tableSource.findIndex((x) => x.key === restProps["data-row-key"]);
     return <SequentialLayerTable.SortableItem index={key} {...restProps}/>;
   };
 
@@ -136,13 +137,16 @@ class SequentialLayerTable extends Component<IProp, IState> {
         <Space>
           <Link
             key="edit"
-            to={Path.LayerEdit(this.props.sequentialName, rowData.key)}>
+            to={{
+              pathname: Path.LayerEdit(this.props.sequentialName, rowData.key),
+              state: { dataSource: this.dataSource[rowData.key] }
+            }}>
             编辑
           </Link>
           <a
             key="delete"
             onClick={() => {
-              this.setState({ dataSource: this.state.dataSource.filter(item => item.key !== rowData.key) });
+              this.setState({ tableSource: this.state.tableSource.filter(item => item.key !== rowData.key) });
             }}>
             删除
           </a>
@@ -153,9 +157,10 @@ class SequentialLayerTable extends Component<IProp, IState> {
   async componentDidMount() {
     if (this.props.sequentialName === undefined)
       return;
-    const response = await Api.SequentialGet<[]>("Layers", { sequentialName: this.props.sequentialName });
-    this.setState({ dataSource: response });
-    this.ref.current?.reload();
+    const response = await Api.SequentialGet<DataType[]>("Layers", { sequentialName: this.props.sequentialName });
+    this.dataSource = await Api.SequentialGet<[][]>("Layers/Edit", { sequentialName: this.props.sequentialName });
+    this.setState({ tableSource: response });
+    //this.ref.current?.reload();
   }
 
   render() {
@@ -164,37 +169,51 @@ class SequentialLayerTable extends Component<IProp, IState> {
       headerTitle="包含层"
       loading={false}
       actionRef={this.ref}
-      dataSource={this.state.dataSource}
+      dataSource={this.state.tableSource}
       columns={this.columns}
       search={false}
       pagination={false}
       toolBarRender={() => {
-        return [<ModalForm
-          title="选择层类型"
-          trigger={<Button>添加一行</Button>}>
-          <ProFormGroup>
-            <ProFormSwitch checkedChildren="自定义序列" unCheckedChildren="框架内置层"
-                           name={"bindingMode"} initialValue={false}/>
-            <ProFormDependency name={["bindingMode"]}>
-              {switchData => {
-                let mode = false;
-                for (let key in switchData)
-                  mode = switchData[key];
-                return mode
-                  ? <ProFormSelect
-                    name="builtin"
-                    width="md"
-                    rules={[{ required: true }]}
-                    request={async () => await Api.SequentialGet("Layers/All")}/>
-                  : <ProFormSelect
-                    name="sequential"
-                    width="md"
-                    rules={[{ required: true }]}
-                    request={async () => await Api.SequentialGet("Layers/New")}/>;
-              }}
-            </ProFormDependency>
-          </ProFormGroup>
-        </ModalForm>
+        return [
+          <ModalForm<{ bindingMode: boolean, builtin?: string, sequential?: string }>
+            title="选择层类型"
+            trigger={<Button>添加一行</Button>}
+            onFinish={async (values) => {
+              const response = await Api.SequentialGet<{ desc: DataType, params: [] }>("Layers/Default", {
+                layerName: values.bindingMode ? values.builtin : values.sequential
+              });
+              response.desc.key = this.state.tableSource[this.state.tableSource.length - 1].key + 1;
+              const ts = this.state.tableSource.concat(response.desc);
+              this.dataSource.push(response.params);
+              this.setState({ tableSource: ts });
+              return true;
+            }}>
+            <ProFormGroup>
+              <ProFormSwitch checkedChildren="自定义序列" unCheckedChildren="框架内置层"
+                             name={"bindingMode"} initialValue={false}/>
+              <ProFormDependency name={["bindingMode"]}>
+                {switchData => {
+                  let mode = false;
+                  for (let key in switchData)
+                    mode = switchData[key];
+                  return mode
+                    ? <ProFormSelect
+                      name="builtin"
+                      width="md"
+                      rules={[{ required: true }]}
+                      request={async () => await Api.SequentialGet("Layers/All")}/>
+                    : <ProFormSelect
+                      name="sequential"
+                      width="md"
+                      rules={[{ required: true }]}
+                      request={async () => await Api.SequentialGet("Layers/New")}/>;
+                }}
+              </ProFormDependency>
+            </ProFormGroup>
+          </ModalForm>,
+          <Button type="primary" onClick={async () => {
+            await Api.SequentialPost("", this.dataSource);
+          }}>提交</Button>
         ];
       }}
       components={{
@@ -202,7 +221,7 @@ class SequentialLayerTable extends Component<IProp, IState> {
           wrapper: this.DraggableContainer,
           row: this.DraggableBodyRow
         }
-      }}/>;
+      }}></ProTable>;
   }
 }
 

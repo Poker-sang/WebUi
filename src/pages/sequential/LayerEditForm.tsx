@@ -11,10 +11,6 @@ import { message } from "antd";
 import ProFormBinding from "./components/ProFormBinding";
 import Api from "@/utils/Api";
 
-interface IState {
-  dataSource: DataType[],
-}
-
 interface DataType {
   name: string,
   type: string,
@@ -24,8 +20,8 @@ interface DataType {
 
 interface ParamType {
   key: number,
-  name: string,
-  type: string
+  name: string | null,
+  type: string | null
 }
 
 
@@ -41,28 +37,22 @@ const intDefaultProps: {
   rules: [{ required: true }]
 };
 
-class LayerEditForm extends Component<any, IState> {
+class LayerEditForm extends Component<any> {
   name: string;
   index: number;
-  dict = new Map<number, string>;
+  dict = new Map<number, string | null>;
 
   constructor(props: any) {
     super(props);
     this.name = this.props.match.params.name;
     this.index = this.props.match.params.index;
-    this.state = { dataSource: [] };
   }
 
   async componentDidMount() {
-    const response = await Api.SequentialGet<DataType[]>("Layers/Edit", {
-      sequentialName: this.name,
-      index: this.index
-    });
-
     const resTable = await Api.SequentialGet<ParamType[]>("Params", { sequentialName: this.name });
     resTable.unshift({ key: -1, name: "InputChannels", type: "Int64" });
+    resTable.unshift({ key: -2, name: null, type: null });
     resTable.map(value => this.dict.set(value.key, value.name));
-    this.setState({ dataSource: response });
   }
 
   render() {
@@ -70,11 +60,10 @@ class LayerEditForm extends Component<any, IState> {
       title={this.name ?? undefined}
       autoFocusFirstInput={true}
       onFinish={async values => {
-        console.log(values);
         message.success("提交成功");
         return true;
       }}>
-      {this.state.dataSource.map((datum, index) => {
+      {this.props.history.location.state.dataSource.map((datum: DataType, index: number) => {
         const initValue = datum.isBinding ? undefined : datum.value;
         if (datum.isBinding)
           datum.value = this.dict.get(datum.value);

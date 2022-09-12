@@ -118,7 +118,7 @@ const SequentialLayerTable: React.FC<IProp> = (props) => {
           render: () => <DragHandle />,
         },
         {
-          title: '排序',
+          title: '序号',
           width: 50,
           dataIndex: 'sort',
           render: (dom, rowData, index) => (
@@ -189,7 +189,8 @@ const SequentialLayerTable: React.FC<IProp> = (props) => {
                   );
                 }}
               >
-                删除
+                {' '}
+                删除{' '}
               </a>
             </Space>
           ),
@@ -227,7 +228,7 @@ const SequentialLayerTable: React.FC<IProp> = (props) => {
               <ProFormSwitch
                 checkedChildren="自定义序列"
                 unCheckedChildren="框架内置层"
-                name={'bindingMode'}
+                name="bindingMode"
                 initialValue={false}
               />
               <ProFormDependency name={['bindingMode']}>

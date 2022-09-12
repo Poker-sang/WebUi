@@ -30,6 +30,16 @@ class Api {
       data: data,
     });
   }
+
+  static async SequentialDelete<T = any>(
+    route: string,
+    params?: any,
+  ): Promise<T> {
+    return await request(`${Api.Sequential}/${route}`, {
+      method: 'delete',
+      params: params,
+    });
+  }
 }
 
 export default Api;

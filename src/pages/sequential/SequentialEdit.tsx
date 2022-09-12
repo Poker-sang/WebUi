@@ -5,7 +5,7 @@ import {
   ProFormText,
   ProFormTextArea,
 } from '@ant-design/pro-components';
-import { Col, Row, Space, Table } from 'antd';
+import { Col, message, Row, Space, Table } from 'antd';
 import React, { useEffect, useRef, useState } from 'react';
 import SequentialLayerTable from './components/SequentialLayerTable';
 import Api from '@/utils/Api';
@@ -22,7 +22,7 @@ export interface ParamType {
 const SequentialEdit: React.FC = () => {
   const params = useParams();
   const [tableSource, setTableSource] = useState<ParamType[]>([]);
-  const name = params.name;
+  let name = params.name;
   const formRef = useRef<ProFormInstance>();
 
   useEffect(() => {
@@ -53,13 +53,31 @@ const SequentialEdit: React.FC = () => {
       <Space direction="vertical" style={{ width: '100%' }} size="large">
         <Row gutter={32}>
           <Col span={12}>
-            <ProForm<{ name: string; remark: string }> formRef={formRef}>
+            <ProForm<{ name: string; remark: string }>
+              formRef={formRef}
+              onFinish={async (value) => {
+                const response = await Api.SequentialDelete<boolean>(
+                  'Sequential/Delete',
+                  {
+                    oldName: name,
+                    newName: value.name,
+                    remark: value.remark,
+                  },
+                );
+
+                if (response) message.success(`更改${name}成功`);
+                else message.error(`更改${name}失败，请刷新后重试`);
+
+                name = value.name;
+              }}
+            >
               <ProFormText
                 name="name"
                 label="名称"
                 initialValue={name}
                 tooltip="最长为 32 位，用于标定的唯一id"
                 placeholder="请输入名称"
+                rules={[{ required: true }]}
               />
               <ProFormTextArea
                 name="remark"

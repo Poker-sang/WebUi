@@ -74,7 +74,11 @@ const SequentialManager: React.FC = () => {
             key: 'option',
             valueType: 'option',
             render: (_, record) => [
-              <Link key="edit" to={Path.SequentialEdit(record.name)}>
+              <Link
+                key="edit"
+                state={{ remark: record.remark }}
+                to={Path.SequentialEdit(record.name)}
+              >
                 编辑
               </Link>,
               <a
@@ -117,7 +121,9 @@ const SequentialManager: React.FC = () => {
         ]}
         request={async () => {
           // 表单搜索项会从 params 传入，传递给后端接口。
-          const response = await Api.SequentialGet<SequentialInfo[]>('All');
+          const response = await Api.SequentialGet<SequentialInfo[]>(
+            'Sequential/All',
+          );
           return {
             data: response,
             success: true,

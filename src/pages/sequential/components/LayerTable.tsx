@@ -1,4 +1,5 @@
 import {
+  ActionType,
   arrayMoveImmutable,
   ModalForm,
   ProFormDependency,
@@ -7,13 +8,13 @@ import {
   ProFormSwitch,
   ProTable,
 } from '@ant-design/pro-components';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Link } from 'umi';
-import { Button, Space } from 'antd';
+import { Button, message, Modal, Space } from 'antd';
 import './drag.less';
 import { OptParam } from '@/pages/sequential/types/kernel';
 import Path from '@/utils/Path';
-import { MenuOutlined } from '@ant-design/icons';
+import { ExclamationCircleOutlined, MenuOutlined } from '@ant-design/icons';
 import {
   SortableContainer,
   SortableElement,
@@ -21,6 +22,7 @@ import {
 } from 'react-sortable-hoc';
 import Api from '@/utils/Api';
 import { ParamType } from '@/pages/Sequential/SequentialEdit';
+import { useParams } from '@@/exports';
 
 interface DataType {
   key: number;
@@ -32,11 +34,10 @@ interface DataType {
 }
 
 interface IProp {
-  sequentialName?: string;
   param?: ParamType[];
 }
 
-const SequentialLayerTable: React.FC<IProp> = (props) => {
+const LayerTable: React.FC<IProp> = (props) => {
   const DragHandle: any = SortableHandle(() => (
     <MenuOutlined style={{ cursor: 'grab', color: '#999' }} />
   ));
@@ -46,6 +47,9 @@ const SequentialLayerTable: React.FC<IProp> = (props) => {
   ));
   const [tableSource, setTableSource] = useState<DataType[]>([]);
   const [dataSource, setDataSource] = useState<[][]>([]);
+  const ref = useRef<ActionType>();
+  const params = useParams();
+  const sequentialName = params.name;
 
   const onSortEnd = ({
     oldIndex,
@@ -54,6 +58,7 @@ const SequentialLayerTable: React.FC<IProp> = (props) => {
     oldIndex: number;
     newIndex: number;
   }) => {
+    console.log(oldIndex, newIndex);
     if (oldIndex !== newIndex)
       setTableSource([
         ...arrayMoveImmutable([...tableSource], oldIndex, newIndex).filter(
@@ -89,23 +94,24 @@ const SequentialLayerTable: React.FC<IProp> = (props) => {
 
   useEffect(() => {
     (async () => {
-      if (props.sequentialName === undefined) return;
-      const response = await Api.SequentialGet<DataType[]>('Layers', {
-        sequentialName: props.sequentialName,
+      if (sequentialName === undefined) return;
+      const response = await Api.SequentialGet<[][]>('Layers/Edit', {
+        sequentialName: sequentialName,
       });
-      const response2 = await Api.SequentialGet<[][]>('Layers/Edit', {
-        sequentialName: props.sequentialName,
+      const response2 = await Api.SequentialGet<DataType[]>('Layers/All', {
+        sequentialName: sequentialName,
       });
-      setTableSource(response);
-      setDataSource(response2);
+      setDataSource(response);
+      setTableSource(response2);
     })();
-  }, [props.sequentialName]);
+  }, [sequentialName]);
 
   return (
     <ProTable
       rowKey="key"
       headerTitle="包含层"
       loading={false}
+      actionRef={ref}
       dataSource={tableSource}
       columns={[
         {
@@ -166,31 +172,54 @@ const SequentialLayerTable: React.FC<IProp> = (props) => {
           title: '选项',
           key: 'option',
           dataIndex: 'option',
-          render: (dom, rowData) => (
+          render: (dom, layer) => (
             <Space>
               <Link
                 key="edit"
                 state={{
-                  dataSource: dataSource[rowData.key],
+                  layerType: layer.name,
+                  dataSource: dataSource[layer.key],
                   tableSource: props.param,
                 }}
-                onClick={() =>
-                  console.log(dataSource, rowData.key, dataSource[rowData.key])
-                }
-                to={Path.LayerEdit(props.sequentialName, rowData.key)}
+                to={Path.LayerEdit(sequentialName, layer.key)}
               >
                 编辑
               </Link>
+              <a key="copy" onClick={() => {}}>
+                复制
+              </a>
               <a
                 key="delete"
                 onClick={() => {
-                  setTableSource(
-                    tableSource.filter((item) => item.key !== rowData.key),
-                  );
+                  Modal.confirm({
+                    title: '删除',
+                    icon: <ExclamationCircleOutlined />,
+                    content: `确认删除第${layer.key}层：${layer.name}吗？此操作不可逆`,
+                    okText: '是',
+                    okType: 'danger',
+                    cancelText: '否',
+                    onOk: async () => {
+                      const response = await Api.SequentialDelete<boolean>(
+                        'Layers/Delete',
+                        {
+                          name: sequentialName,
+                          index: layer.key,
+                        },
+                      );
+                      if (response)
+                        message.success(
+                          `删除第${layer.key}层：${layer.name}成功`,
+                        );
+                      else
+                        message.error(
+                          `删除第${layer.key}层：${layer.name}失败，请刷新后重试`,
+                        );
+                      ref.current?.reload();
+                    },
+                  });
                 }}
               >
-                {' '}
-                删除{' '}
+                删除
               </a>
             </Space>
           ),
@@ -217,7 +246,11 @@ const SequentialLayerTable: React.FC<IProp> = (props) => {
                   ? values.builtin
                   : values.sequential,
               });
-              response.desc.key = tableSource[tableSource.length - 1].key + 1;
+
+              response.desc.key =
+                tableSource.length === 0
+                  ? 0
+                  : tableSource[tableSource.length - 1].key + 1;
               const ts = tableSource.concat(response.desc);
               dataSource.push(response.params);
               setTableSource(ts);
@@ -242,7 +275,7 @@ const SequentialLayerTable: React.FC<IProp> = (props) => {
                       width="md"
                       rules={[{ required: true }]}
                       request={async () =>
-                        await Api.SequentialGet('Layers/All')
+                        await Api.SequentialGet('Sequential/List')
                       }
                     />
                   ) : (
@@ -251,7 +284,7 @@ const SequentialLayerTable: React.FC<IProp> = (props) => {
                       width="md"
                       rules={[{ required: true }]}
                       request={async () =>
-                        await Api.SequentialGet('Layers/New')
+                        await Api.SequentialGet('Layers/List')
                       }
                     />
                   );
@@ -259,16 +292,6 @@ const SequentialLayerTable: React.FC<IProp> = (props) => {
               </ProFormDependency>
             </ProFormGroup>
           </ModalForm>,
-          <Button
-            key="button"
-            type="primary"
-            onClick={async () => {
-              console.log(dataSource);
-              await Api.SequentialPut('Layers/Update', dataSource);
-            }}
-          >
-            提交
-          </Button>,
         ];
       }}
       components={{
@@ -281,4 +304,4 @@ const SequentialLayerTable: React.FC<IProp> = (props) => {
   );
 };
 
-export default SequentialLayerTable;
+export default LayerTable;

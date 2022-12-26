@@ -1,15 +1,14 @@
 import {
   PageContainer,
   ProForm,
-  ProFormInstance,
   ProFormText,
   ProFormTextArea,
 } from '@ant-design/pro-components';
-import { Col, message, Row, Space, Table } from 'antd';
-import React, { useEffect, useRef, useState } from 'react';
-import SequentialLayerTable from './components/SequentialLayerTable';
+import { message, Space, Table } from 'antd';
+import React, { useEffect, useState } from 'react';
+import LayerTable from './components/LayerTable';
 import Api from '@/utils/Api';
-import { useParams } from '@@/exports';
+import { useLocation, useParams } from '@@/exports';
 
 export interface ParamType {
   key: number;
@@ -23,18 +22,18 @@ const SequentialEdit: React.FC = () => {
   const params = useParams();
   const [tableSource, setTableSource] = useState<ParamType[]>([]);
   let name = params.name;
-  const formRef = useRef<ProFormInstance>();
+  const { state }: any = useLocation();
+  const { remark }: { remark: string } = state;
 
   useEffect(() => {
     (async () => {
       if (name === undefined) return;
-      const resForm = await Api.SequentialGet<string>('Find/Metadata', {
-        sequentialName: name,
-        metadataName: 'Remark',
-      });
-      const resTable = await Api.SequentialGet<ParamType[]>('Params', {
-        sequentialName: name,
-      });
+      const resTable = await Api.SequentialGet<ParamType[]>(
+        'Sequential/Params',
+        {
+          sequentialName: name,
+        },
+      );
       resTable.unshift({
         key: -1,
         name: 'InputChannels',
@@ -44,84 +43,85 @@ const SequentialEdit: React.FC = () => {
       });
 
       setTableSource(resTable);
-      formRef.current?.setFieldValue('remark', resForm);
     })();
   }, [name]);
 
   return (
-    <PageContainer header={{ title: '网络训练' }}>
+    <PageContainer header={{ title: `序列编辑：${name}` }}>
       <Space direction="vertical" style={{ width: '100%' }} size="large">
-        <Row gutter={32}>
-          <Col span={12}>
-            <ProForm<{ name: string; remark: string }>
-              formRef={formRef}
-              onFinish={async (value) => {
-                const response = await Api.SequentialDelete<boolean>(
-                  'Sequential/Delete',
-                  {
-                    oldName: name,
-                    newName: value.name,
-                    remark: value.remark,
-                  },
-                );
+        <ProForm<{ name: string; remark: string }>
+          onFinish={async (value) => {
+            const response = await Api.SequentialDelete<boolean>(
+              'Sequential/Delete',
+              {
+                oldName: name,
+                newName: value.name,
+                remark: value.remark,
+              },
+            );
 
-                if (response) message.success(`更改${name}成功`);
-                else message.error(`更改${name}失败，请刷新后重试`);
+            if (response) message.success(`更改${name}成功`);
+            else message.error(`更改${name}失败，请刷新后重试`);
 
-                name = value.name;
-              }}
-            >
-              <ProFormText
-                name="name"
-                label="名称"
-                initialValue={name}
-                tooltip="最长为 32 位，用于标定的唯一id"
-                placeholder="请输入名称"
-                rules={[{ required: true }]}
-              />
-              <ProFormTextArea
-                name="remark"
-                label="备注"
-                placeholder="请输入备注"
-              />
-            </ProForm>
-          </Col>
-          <Col span={12}>
-            <Table
-              title={() => '参数列表'}
-              dataSource={tableSource}
-              columns={[
-                {
-                  title: '$',
-                  width: 30,
-                  dataIndex: 'key',
-                  key: 'key',
-                  render: (dom) => (dom === -1 ? '*' : dom?.toString()),
-                },
-                {
-                  title: '名称',
-                  dataIndex: 'name',
-                  key: 'name',
-                },
-                {
-                  title: '类型',
-                  dataIndex: 'type',
-                  key: 'type',
-                },
-                {
-                  title: '默认值',
-                  dataIndex: 'default',
-                  key: 'default',
-                  render: (dom) => dom?.toString(),
-                },
-              ]}
-              pagination={false}
-              size="small"
-              rowKey="key"
-            />
-          </Col>
-        </Row>
-        <SequentialLayerTable sequentialName={name} param={tableSource} />
+            name = value.name;
+          }}
+        >
+          <ProFormText
+            name="name"
+            label="名称"
+            initialValue={name}
+            tooltip="最长为 32 位，用于标定的唯一id"
+            placeholder="请输入名称"
+            rules={[{ required: true }]}
+          />
+          <ProFormTextArea
+            name="remark"
+            label="备注"
+            placeholder="请输入备注"
+            initialValue={remark}
+          />
+        </ProForm>
+        <Table
+          title={() => '参数列表'}
+          dataSource={tableSource}
+          columns={[
+            {
+              title: '$',
+              width: 30,
+              dataIndex: 'key',
+              key: 'key',
+              render: (dom) => (dom === -1 ? '*' : dom?.toString()),
+            },
+            {
+              title: '名称',
+              width: 150,
+              dataIndex: 'name',
+              key: 'name',
+            },
+            {
+              title: '类型',
+              width: 50,
+              dataIndex: 'type',
+              key: 'type',
+            },
+            {
+              title: '注释',
+              dataIndex: 'remark',
+              key: 'remark',
+            },
+            {
+              title: '默认值',
+              width: 100,
+              dataIndex: 'default',
+              key: 'default',
+              render: (dom) => dom?.toString(),
+            },
+          ]}
+          pagination={false}
+          size="small"
+          rowKey="key"
+        />
+        <LayerTable param={tableSource} />
       </Space>
     </PageContainer>
   );

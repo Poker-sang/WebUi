@@ -45,17 +45,14 @@ export default defineConfig({
     },
     {
       path: Path.SequentialEdit(),
-      title: '序列编辑',
       component: './Sequential/SequentialEdit',
     },
     {
       path: Path.LayerEdit(),
-      title: '层编辑',
       component: './Sequential/LayerEdit',
     },
     {
       path: Path.SequentialNew,
-      title: '层新建',
       component: './Sequential/SequentialEdit',
     },
   ],
